@@ -22,8 +22,9 @@
     </style>
   </head>
   <body>
-    <h1>Screen Refresh Rate000</h1>
+    <h1>Screen Refresh Rate</h1>
     <h1 id="count"></h1>
+    <h1 id="times"></h1>
     <p id="rate">Calculating...</p>
 
     <div class="box" id="box"></div>
@@ -36,13 +37,15 @@
           if (!startTime) {
             startTime = timestamp;
           }
-          console.log('startTime',startTime)
-          frameCount++;
 
+          frameCount++;
+          document.getElementById(
+            "times"
+          ).innerText = `Refresh times: ${frameCount}`;
           const elapsed = timestamp - startTime;
 
           // 尽量在短时间内多次测量
-          if (elapsed >= 100) {
+          if (elapsed >= 200) {
             // 测量100毫秒内的帧数
             const refreshRate = (frameCount / elapsed) * 1000;
             callback(refreshRate);

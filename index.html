@@ -1,45 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Screen Refresh Rate</title>
-<style>
-  body { text-align: center; padding-top: 20vh; font-family: Arial, sans-serif; }
-</style>
-</head>
-<body>
-<h1>Screen Refresh Rate</h1>
-<h1 id="count"></h1>
-<p id="rate">Calculating...</p>
-<script>
-  function getRefreshRate(callback) {
-    let frameCount = 0;
-    let startTime;
-    
-    function step(timestamp) {
-        if (!startTime) {
-            startTime = timestamp;
-        }
-        
-        frameCount++;
-        document.getElementById('count').innerText = `Calculating times: ${frameCount}`;
-        let elapsed = timestamp - startTime;
-        
-        if (elapsed >= 1000) { // 计算1秒内的帧数
-            let refreshRate = (frameCount / elapsed) * 1000;
-            callback(refreshRate);
-        } else {
-            requestAnimationFrame(step);
-        }
-    }
-    
-    requestAnimationFrame(step);
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen Refresh Rate</title>
+    <style>
+      body {
+        text-align: center;
+        padding-top: 20vh;
+        font-family: Arial, sans-serif;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        background-color: red;
+        position: absolute;
+        top: 50%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Screen Refresh Rate000</h1>
+    <h1 id="count"></h1>
+    <p id="rate">Calculating...</p>
 
-  getRefreshRate((rate) => {
-    document.getElementById('rate').innerText = `屏幕刷新率: ${rate.toFixed(2)} Hz`;
-  });
-</script>
-</body>
+    <div class="box" id="box"></div>
+    <script>
+      function getRefreshRate(callback) {
+        let frameCount = 0;
+        let startTime;
+
+        function step(timestamp) {
+          if (!startTime) {
+            startTime = timestamp;
+          }
+          console.log('startTime',startTime)
+          frameCount++;
+
+          const elapsed = timestamp - startTime;
+
+          // 尽量在短时间内多次测量
+          if (elapsed >= 100) {
+            // 测量100毫秒内的帧数
+            const refreshRate = (frameCount / elapsed) * 1000;
+            callback(refreshRate);
+          } else {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      getRefreshRate((rate) => {
+        document.getElementById("rate").innerText = `屏幕刷新率: ${rate.toFixed(
+          2
+        )} Hz`;
+      });
+
+      // 让box持续移动，以触发更多帧
+      const box = document.getElementById("box");
+      let pos = 0;
+      function moveBox() {
+        pos = (pos + 1) % window.innerWidth;
+        box.style.transform = `translate(${pos}px, 50%)`;
+        requestAnimationFrame(moveBox);
+      }
+      moveBox();
+    </script>
+  </body>
 </html>

@@ -1,77 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Screen Refresh Rate</title>
-    <style>
-      body {
-        text-align: center;
-        padding-top: 20vh;
-        font-family: Arial, sans-serif;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irregular Motion Animation</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .box {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      border: 1px solid #000;
+      margin-bottom: 20px;
+    }
+
+    #box1 {
+      background-color: lightblue;
+    }
+
+    #box2 {
+      background-color: lightgreen;
+    }
+    #box3 {
+      background-color: rgb(233, 144, 238);
+    }
+    .ball {
+      width: 40px;  /* 增加球的大小 */
+      height: 40px; /* 增加球的大小 */
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="box1" class="box">
+      <div id="ball1" class="ball"></div>
+    </div>
+    <div id="box2" class="box">
+      <div id="ball2" class="ball"></div>
+    </div>
+    <div id="box3" class="box">
+      <div id="ball3" class="ball"></div>
+    </div>
+  </div>
+
+  <script>
+    let ball1 = document.getElementById('ball1');
+    let ball2 = document.getElementById('ball2');
+    let ball3 = document.getElementById('ball3');
+    let box1 = document.getElementById('box1');
+    let box2 = document.getElementById('box2');
+    let box3 = document.getElementById('box3');
+
+    let x1 = 0, y1 = 0;
+    let x2 = 0, y2 = 0;
+    let x3 = 0, y3 = 0;
+    let directionX1 = 1, directionY1 = 1;
+    let directionX2 = 1, directionY2 = 1;
+    let directionX3 = 1, directionY3 = 1;
+
+    // 加快小球运动的速度
+    let speedX1 = 5, speedY1 = 5;
+    let speedX2 = 3, speedY2 = 3;
+    let speedX3 = 3, speedY3 = 3;
+
+    function animateBall1() {
+      x1 += directionX1 * speedX1;
+      y1 += directionY1 * speedY1;
+      if (x1 >= box1.clientWidth - ball1.clientWidth || x1 <= 0) {
+        directionX1 *= -1;
       }
-      .box {
-        width: 50px;
-        height: 50px;
-        background-color: red;
-        position: absolute;
-        top: 50%;
-        left: 10%;
-        transform: translate(-50%, -50%);
+      if (y1 >= box1.clientHeight - ball1.clientHeight || y1 <= 0) {
+        directionY1 *= -1;
       }
-    </style>
-  </head>
-  <body>
-    <h1>Screen Refresh Rate</h1>
-    <h1 id="count"></h1>
-    <h1 id="times"></h1>
-    <p id="rate">Calculating...</p>
+      ball1.style.transform = `translate(${x1}px, ${y1}px)`;
 
-    <div class="box" id="box"></div>
-    <script>
-      function getRefreshRate(callback) {
-        let frameCount = 0;
-        let startTime;
+      setTimeout(() => requestAnimationFrame(animateBall1), 1000 / 60);
+    }
 
-        function step(timestamp) {
-          if (!startTime) {
-            startTime = timestamp;
-          }
-
-          frameCount++;
-          document.getElementById(
-            "times"
-          ).innerText = `Refresh times: ${frameCount}`;
-          const elapsed = timestamp - startTime;
-
-          // 尽量在短时间内多次测量
-          if (elapsed >= 200) {
-            // 测量100毫秒内的帧数
-            const refreshRate = (frameCount / elapsed) * 1000;
-            callback(refreshRate);
-          } else {
-            requestAnimationFrame(step);
-          }
-        }
-
-        requestAnimationFrame(step);
+    function animateBall2() {
+      x2 += directionX2 * speedX2;
+      y2 += directionY2 * speedY2;
+      if (x2 >= box2.clientWidth - ball2.clientWidth || x2 <= 0) {
+        directionX2 *= -1;
       }
-
-      getRefreshRate((rate) => {
-        document.getElementById("rate").innerText = `屏幕刷新率: ${rate.toFixed(
-          2
-        )} Hz`;
-      });
-
-      // 让box持续移动，以触发更多帧
-      const box = document.getElementById("box");
-      let pos = 0;
-      function moveBox() {
-        pos = (pos + 1) % window.innerWidth;
-        box.style.transform = `translate(${pos}px, 50%)`;
-        requestAnimationFrame(moveBox);
+      if (y2 >= box2.clientHeight - ball2.clientHeight || y2 <= 0) {
+        directionY2 *= -1;
       }
-      moveBox();
-    </script>
-  </body>
+      ball2.style.transform = `translate(${x2}px, ${y2}px)`;
+
+      setTimeout(() => requestAnimationFrame(animateBall2), 1000 / 120);
+    }
+
+    function animateBall3() {
+      x3 += directionX3 * speedX3;
+      y3 += directionY3 * speedY3;
+      if (x3 >= box3.clientWidth - ball3.clientWidth || x3 <= 0) {
+        directionX3 *= -1;
+      }
+      if (y3 >= box3.clientHeight - ball3.clientHeight || y3 <= 0) {
+        directionY3 *= -1;
+      }
+      ball3.style.transform = `translate(${x3}px, ${y3}px)`;
+
+      setTimeout(() => requestAnimationFrame(animateBall3), 1000 / 180);
+    }
+
+    requestAnimationFrame(animateBall1);
+    requestAnimationFrame(animateBall2);
+    requestAnimationFrame(animateBall3);
+  </script>
+</body>
 </html>

@@ -3,29 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Irregular Motion Animation</title>
+  <title>Refresh Rate Animation</title>
   <style>
-    body, html {
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
       margin: 0;
-      padding: 0;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f8fb;
     }
 
     .container {
-      width: 100%;
-      max-width: 500px;
+      width: min(100%, 500px);
+      margin: 0 auto;
     }
 
     .box {
-      width: 100%;
-      height: 200px;
       position: relative;
-      border: 1px solid #000;
+      height: 200px;
       margin-bottom: 20px;
+      overflow: hidden;
+      border: 1px solid #111827;
+      border-radius: 8px;
     }
 
     #box1 {
@@ -35,96 +42,73 @@
     #box2 {
       background-color: lightgreen;
     }
+
     #box3 {
       background-color: rgb(233, 144, 238);
     }
+
     .ball {
-      width: 40px;  /* 增加球的大小 */
-      height: 40px; /* 增加球的大小 */
-      background-color: white;
-      border-radius: 50%;
       position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: white;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+      will-change: transform;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="box1" class="box">
-      <div id="ball1" class="ball"></div>
-    </div>
-    <div id="box2" class="box">
-      <div id="ball2" class="ball"></div>
-    </div>
-    <div id="box3" class="box">
-      <div id="ball3" class="ball"></div>
-    </div>
-  </div>
+  <main class="container" aria-label="Refresh rate animation demo">
+    <div id="box1" class="box"><div id="ball1" class="ball"></div></div>
+    <div id="box2" class="box"><div id="ball2" class="ball"></div></div>
+    <div id="box3" class="box"><div id="ball3" class="ball"></div></div>
+  </main>
 
   <script>
-    let ball1 = document.getElementById('ball1');
-    let ball2 = document.getElementById('ball2');
-    let ball3 = document.getElementById('ball3');
-    let box1 = document.getElementById('box1');
-    let box2 = document.getElementById('box2');
-    let box3 = document.getElementById('box3');
+    const animations = [
+      { ball: document.getElementById("ball1"), box: document.getElementById("box1"), velocity: { x: 120, y: 120 } },
+      { ball: document.getElementById("ball2"), box: document.getElementById("box2"), velocity: { x: 170, y: 170 } },
+      { ball: document.getElementById("ball3"), box: document.getElementById("box3"), velocity: { x: 255, y: 255 } },
+    ].map((animation) => ({ ...animation, position: { x: 0, y: 0 } }));
 
-    let x1 = 0, y1 = 0;
-    let x2 = 0, y2 = 0;
-    let x3 = 0, y3 = 0;
-    let directionX1 = 1, directionY1 = 1;
-    let directionX2 = 1, directionY2 = 1;
-    let directionX3 = 1, directionY3 = 1;
+    let lastTimestamp;
 
-    // 加快小球运动的速度
-    let speedX1 = 2, speedY1 = 2;
-    let speedX2 = 1.414, speedY2 = 1.414;
-    let speedX3 = 1.414, speedY3 = 1.414;
+    function updateAnimation(animation, elapsedSeconds) {
+      const { ball, box, position, velocity } = animation;
+      const maxX = box.clientWidth - ball.offsetWidth;
+      const maxY = box.clientHeight - ball.offsetHeight;
 
-    function animateBall1() {
-      x1 += directionX1 * speedX1;
-      y1 += directionY1 * speedY1;
-      if (x1 >= box1.clientWidth - ball1.clientWidth || x1 <= 0) {
-        directionX1 *= -1;
+      position.x += velocity.x * elapsedSeconds;
+      position.y += velocity.y * elapsedSeconds;
+
+      if (position.x <= 0 || position.x >= maxX) {
+        position.x = Math.min(Math.max(position.x, 0), maxX);
+        velocity.x *= -1;
       }
-      if (y1 >= box1.clientHeight - ball1.clientHeight || y1 <= 0) {
-        directionY1 *= -1;
-      }
-      ball1.style.transform = `translate(${x1}px, ${y1}px)`;
 
-      setTimeout(() => requestAnimationFrame(animateBall1), 1000 / 60);
+      if (position.y <= 0 || position.y >= maxY) {
+        position.y = Math.min(Math.max(position.y, 0), maxY);
+        velocity.y *= -1;
+      }
+
+      ball.style.transform = `translate(${position.x}px, ${position.y}px)`;
     }
 
-    function animateBall2() {
-      x2 += directionX2 * speedX2;
-      y2 += directionY2 * speedY2;
-      if (x2 >= box2.clientWidth - ball2.clientWidth || x2 <= 0) {
-        directionX2 *= -1;
+    function animate(timestamp) {
+      if (lastTimestamp === undefined) {
+        lastTimestamp = timestamp;
       }
-      if (y2 >= box2.clientHeight - ball2.clientHeight || y2 <= 0) {
-        directionY2 *= -1;
-      }
-      ball2.style.transform = `translate(${x2}px, ${y2}px)`;
 
-      setTimeout(() => requestAnimationFrame(animateBall2), 1000 / 120);
+      // Cap long pauses (for example, after a background tab resumes) to avoid jumps.
+      const elapsedSeconds = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
+      lastTimestamp = timestamp;
+
+      animations.forEach((animation) => updateAnimation(animation, elapsedSeconds));
+      requestAnimationFrame(animate);
     }
 
-    function animateBall3() {
-      x3 += directionX3 * speedX3;
-      y3 += directionY3 * speedY3;
-      if (x3 >= box3.clientWidth - ball3.clientWidth || x3 <= 0) {
-        directionX3 *= -1;
-      }
-      if (y3 >= box3.clientHeight - ball3.clientHeight || y3 <= 0) {
-        directionY3 *= -1;
-      }
-      ball3.style.transform = `translate(${x3}px, ${y3}px)`;
-
-      setTimeout(() => requestAnimationFrame(animateBall3), 1000 / 180);
-    }
-
-    requestAnimationFrame(animateBall1);
-    requestAnimationFrame(animateBall2);
-    requestAnimationFrame(animateBall3);
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
